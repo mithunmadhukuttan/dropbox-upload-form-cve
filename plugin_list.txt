@@ -1,0 +1,4 @@
+name	status	update	version	update_version	auto_update
+akismet	inactive	none	5.7.2		off
+dropbox-upload-form	active	none	0.2.1		off
+hello	inactive	none	1.7.2		off

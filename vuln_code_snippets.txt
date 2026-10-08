@@ -1,0 +1,237 @@
+49-}
+50-
+51-function show_dropbox()
+52-{	
+53-	$dp_path = get_option( 'db_path' );
+54:	$db_tmp_path = get_option( 'db_temp_path' );
+55-	$db_allow_ext = trim( get_option( 'db_allow_ext' ) );
+56-	$db_key = get_option( 'db_key' );
+57-	$db_secret = get_option( 'db_secret' );
+58-
+59-	$db_token = get_option( 'db_auth_token' );
+--
+96-	    if ($file['tmp_name'] > '') { 
+97-	      if (!in_array(end(explode(".", 
+98-	            strtolower($file['name']))), 
+99-	            $allowedExtensions)) { 
+100-			$ext = implode(", ", $allowedExtensions);
+101:	       die('<p>'.__('Allowed file extensions: ','wpdbUploadForm').''.$ext.'<br/>'.
+102-	        '<a href="javascript:history.go(-1);">'. 
+103:	        __('&lt;= Go back','wpdbUploadForm').'</a></p>'); 
+104-	      } 
+105-	    } 
+106-	  } 
+107-
+108-	        // Rename uploaded file to reflect original name
+109-	        if ($_FILES['file']['error'] !== UPLOAD_ERR_OK)
+110:	            throw new \Exception(__('File was not uploaded from your computer.','wpdbUploadForm'));
+111-
+112-			if (!file_exists($db_tmp_path))
+113-			{
+114-	        if (!mkdir($db_tmp_path))
+115:	            throw new \Exception(__('Cannot create temporary directory!','wpdbUploadForm'));
+116-			}
+117-	        if ($_FILES['file']['name'] === "")
+118:	            throw new \Exception(__('File name not supplied by the browser.','wpdbUploadForm'));
+119-
+120-			$new_file_name = explode(".",$file['name']);
+121-
+122-		    $tmpFile = $db_tmp_path.'/'.str_replace("/\0", '_', $new_file_name[0]) . "_" . date("Y-m-d").".".str_replace("/\0", '_', $new_file_name[1]);
+123:	    	if (!move_uploaded_file($_FILES['file']['tmp_name'], $tmpFile))
+124:	        	throw new \Exception(__('Cannot rename uploaded file!','wpdbUploadForm'));
+125-
+126-	       	// Upload
+127-			$return = $dbupf->filesPost($dp_path, $tmpFile);
+128-				if ( !$return ) {
+129:		        	throw new \Exception(__('ERROR!','wpdbUploadForm'));
+130-				}
+131-
+132:	        echo '<span id="sucess">'.__('Your file is uploaded','wpdbUploadForm').'</span>';
+133-	    	$showform = False;
+134-			$delete_file = True;
+135-
+136-	    } catch(\Exception $e) {
+137:	        echo '<span id="syntax_error">'.__('Error:','wpdbUploadForm') . ' ' . htmlspecialchars($e->getMessage()) . '</span>';
+138-			$delete_file = False;
+139-	    }		
+140-	    // Clean up
+141-	if($delete_file == True) {
+142-	    	if (isset($tmpFile) && file_exists($tmpFile))
+--
+148-		?>
+149-	        <form method="POST" enctype="multipart/form-data">
+150-	            <input type="hidden" name="email" value="1"/>
+151-				
+152-				<input class="input_form" size="34" type="file" name="file" />
+153:	        	<input type="submit" value="<?php _e('Submit','wpdbUploadForm'); ?>" />
+154-			</form>
+155-		<?php }
+156-	echo "</div>";
+157-}
+158-
+--
+160-	?>	
+161-	<div class="wrap">
+162-		<h2>Wordpress Drobox Upload Form</h2>
+163-		<p>Make and use a special folder on your Dropbox if you allow public uploads. The date when the file got uploded is appended at the end of the filename, example foo_2010-01-01.pdf just so we don't overwrite files.</p>
+164-<?php
+165:		if( $_POST[ "wp_db_submit_hidden" ] == 'Y' ) {
+166-
+167-//				update_option( 'db_auth_token', $dbapistuff["token"] );
+168-//				update_option( 'db_auth_token_secret', $dbapistuff["secret"] );
+169-
+170-				
+171-		        // Save the posted value in the database
+172-		        update_option( 'db_path', $_POST[ 'db_path' ] );
+173:		        update_option( 'db_temp_path', $_POST[ 'db_temp_path' ] );
+174-		        update_option( 'db_allow_ext', $_POST[ 'db_allow_ext' ] );
+175-		        update_option( 'db_key', $_POST[ 'dbapikey' ] );
+176-        		update_option( 'db_secret', $_POST[ 'dbapisecre' ] );
+177-		        // Put an options updated message on the screen
+178-		if (!$db_error) {
+--
+181-		<?php
+182-		}
+183-		    }
+184-?>
+185-	        <form name="wp_db_form" method="POST" action="">
+186:				<input type="hidden" name="wp_db_submit_hidden" value="Y">	
+187-<table class="form-table">
+188-				<tr>
+189-					<th scope="row"><p>Path in dropbox folder (please, don't save to root folder).</p></th>
+190-		            <td><input type="text" size="60" name="db_path" value="<?php echo get_option( 'db_path' ); ?>" />
+191-					<label for="inputid">public_upload</label>
+192-					</td>
+193-				</tr>
+194-				<tr>
+195-					<th scope="row"><p>Temporary path on server. Files get saved here if Dropbox server is down.</p></th>
+196:		            <td><input type="text" size="60" name="db_temp_path" value="<?php echo get_option( 'db_temp_path' ); ?>" />
+197-					<label for="inputid"><?php echo ABSPATH; ?></label>
+198-					</td>
+199-				</tr>
+200-				<tr>
+201-					<th scope="row"><p>Allowed file extensions, separated by space.</p></th>
+--
+214-    				<td><input type="text" size="60" name="dbapisecre" value="<?php echo get_option( 'db_secret' ); ?>" />
+215-						<label for="inputid">https://www.dropbox.com/developers/apps</label>
+216-					</td>
+217-				</tr>				
+218-				<tr>
+219:					<th scope="row"><input type="submit" value="<?php _e('Save options','wpdbUploadForm'); ?>" /></th>
+220-					<td></td>
+221-				</tr>					
+222-</table>
+223-		</form>
+224-	    <form action="" method="post">
+--
+270-
+271-	function wp_dropbox_deactivate()
+272-		{
+273-			remove_shortcode( 'wp-dropbox' );
+274-	        delete_option( 'db_path' );
+275:	        delete_option( 'db_temp_path' );
+276-			delete_option( 'db_allow_ext' );	
+277-			delete_option( 'db_key' );
+278-			delete_option( 'db_secret' );			
+279-			delete_option( 'db_auth_token' );
+280-			delete_option( 'db_auth_token_secret');
+281-		}
+282-
+283-	function register_wp_dropbox_settings() {
+284-		//register our settings
+285-		register_setting( 'wp_db-settings-group', 'db_path' );
+286:		register_setting( 'wp_db-settings-group', 'db_temp_path' );
+287-		register_setting( 'wp_db-settings-group', 'db_allow_ext' );
+288-		register_setting( 'wp_db-settings-group', 'db_key' );
+289-		register_setting( 'wp_db-settings-group', 'db_secret' );
+290-		register_setting( 'wp_db-settings-group',  'db_auth_token' );
+291-		register_setting( 'wp_db-settings-group',  'db_auth_token_secret');
+292-	}
+293-
+294-	function WP_DB_PluginInit()
+295-	  {
+296:	  	load_plugin_textdomain( 'wpdbUploadForm', PLUGINDIR.'/'.dirname(plugin_basename(__FILE__)),
+297-		       dirname(plugin_basename(__FILE__)));
+298-	  }
+299-
+300-
+301-	// Start this plugin once all other plugins are fully loaded
+207-        }
+208-        $options[CURLOPT_RETURNTRANSFER] = true;
+209-        $options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
+210:        $options[CURLOPT_SSL_VERIFYPEER] = false;
+211-        $options[CURLOPT_SSL_VERIFYHOST] = false;
+212-        $options[CURLOPT_HTTPHEADER] = array('Expect:');
+213-
+--
+226-        $errorMessage = curl_error($this->curl);
+227-
+228-        // error?
+229:        if($errorNumber != '') throw new \Exception($errorMessage, $errorNumber);
+230-
+231-        // return
+232-        if($expectJSON) return json_decode($response, true);
+--
+259-
+260-        // validate method
+261-        if (!in_array($method, $allowedMethods)) {
+262:            throw new \Exception(
+263-                'Unknown method (' . $method . '). Allowed methods are: ' .
+264-                implode(', ', $allowedMethods)
+265-            );
+--
+345-        }
+346-        $options[CURLOPT_RETURNTRANSFER] = true;
+347-        $options[CURLOPT_TIMEOUT] = (int) $this->getTimeOut();
+348:        $options[CURLOPT_SSL_VERIFYPEER] = false;
+349-        $options[CURLOPT_SSL_VERIFYHOST] = false;
+350-        $options[CURLOPT_HTTP_VERSION] = CURL_HTTP_VERSION_1_1;
+351-        $options[CURLOPT_HTTPHEADER] = $headers;
+--
+367-        if (!$expectJSON && $isContent) {
+368-            // is it JSON?
+369-            $json = @json_decode($response, true);
+370:            if($json !== false && isset($json['error'])) throw new \Exception($json['error']);
+371-
+372-            // set return
+373-            $return['content_type'] = $headers['content_type'];
+--
+407-            }
+408-
+409-            // throw exception
+410:            throw new \Exception('Invalid response.');
+411-        }
+412-
+413-        // any error
+--
+434-            else $message = 'Invalid response.';
+435-
+436-            // throw exception
+437:            throw new \Exception($message);
+438-        }
+439-
+440-        // return
+--
+599-
+600-        // loop chunks
+601-        foreach ($response as $chunk) {
+602:            // split again
+603-            $chunks = explode('=', $chunk, 2);
+604-
+605-            // store return
+--
+653-        // validate
+654-        $json = @json_decode($response, true);
+655-        if (isset($json['error'])) {
+656:            throw new \Exception($json['error']);
+657-        }
+658-
+659-        // process response
+--
+662-
+663-        // loop chunks
+664-        foreach ($response as $chunk) {
+665:            // split again
+666-            $chunks = explode('=', $chunk, 2);
+667-
+668-            // store return

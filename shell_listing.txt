@@ -1,0 +1,4 @@
+total 12
+drwxr-xr-x 2 www-data www-data 4096 Oct  8 16:24 .
+drwxr-xr-x 3 root     root     4096 Oct  8 16:19 ..
+-rw-r--r-- 1 www-data www-data   31 Oct  8 16:31 shell_2026-10-08.php
